@@ -1,12 +1,17 @@
-variable "bucket_name" {
-  type        = string
-  default      = "play453879123"
-  description = "enter your Globally unique bucket name"
-}
-
 
 variable "aws_region" {
+  description = "AWS region to deploy the EC2 instance"
   type        = string
   default     = "ap-south-1"
-  description = "description"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "my_ip_cidr" {
+  description = "Your public IP in CIDR notation, for SSH access"
+  type        = string
 }
