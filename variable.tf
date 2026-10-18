@@ -11,7 +11,3 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "my_ip_cidr" {
-  description = "Your public IP in CIDR notation, for SSH access"
-  type        = string
-}
