@@ -11,3 +11,9 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
+
+variable "my_ip_cidr" {
+  description = "CIDR block allowed to access the EC2 instance"
+  type        = string
+}
+
