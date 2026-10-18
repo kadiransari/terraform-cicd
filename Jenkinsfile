@@ -3,58 +3,54 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Terraform Init') {
+        stage('Install Terraform') {
             steps {
-                sh 'terraform init'
+                sh '''
+                    if ! command -v terraform >/dev/null 2>&1; then
+                        apt-get update
+                        apt-get install -y curl unzip
+                        curl -fsSLo /tmp/terraform.zip \
+                          https://releases.hashicorp.com/terraform/1.16.5/terraform_1.16.5_linux_amd64.zip
+                        unzip -o /tmp/terraform.zip -d /tmp/terraform-bin
+                    else
+                        mkdir -p /tmp/terraform-bin
+                        cp "$(command -v terraform)" /tmp/terraform-bin/terraform
+                    fi
+                '''
             }
         }
 
-        // stage('Terraform Format') {
-        //     steps {
-        //         sh 'terraform fmt -check'
-        //     }
-        // }
+        stage('Terraform Init') {
+            steps {
+                sh '''
+                    export PATH="/tmp/terraform-bin:$PATH"
+                    terraform init
+                '''
+            }
+        }
 
         stage('Terraform Validate') {
             steps {
-                sh 'terraform validate'
+                sh '''
+                    export PATH="/tmp/terraform-bin:$PATH"
+                    terraform validate
+                '''
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -out=tfplan'
+                sh '''
+                    export PATH="/tmp/terraform-bin:$PATH"
+                    terraform plan -input=false
+                '''
             }
-        }
-
-        stage('Approval') {
-            steps {
-                input message: 'Approve Terraform Apply?', ok: 'Approve'
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                sh 'terraform apply -auto-approve tfplan'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Terraform deployment successful!'
-        }
-
-        failure {
-            echo 'Terraform pipeline failed!'
         }
     }
 }
-
